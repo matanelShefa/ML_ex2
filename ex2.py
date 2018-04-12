@@ -9,11 +9,10 @@ def create_normal_distribution(mean, std):
     return normal_distribution
 
 
+# Create a pair of (point, tag) for each list.
 def create_tag_list(points_list, tag):
-    tag_list = []
     for point in points_list:
-        tag_list.append([point, tag])
-    return tag_list
+        data.append([point, tag])
 
 
 normalDistribution1 = create_normal_distribution(2, 1)
@@ -21,11 +20,16 @@ normalDistribution2 = create_normal_distribution(4, 1)
 normalDistribution3 = create_normal_distribution(6, 1)
 
 data = []
-data.append(create_tag_list(normalDistribution1, 1))
-data.append(create_tag_list(normalDistribution1, 2))
-data.append(create_tag_list(normalDistribution1, 3))
+create_tag_list(normalDistribution1, 1)
+create_tag_list(normalDistribution1, 2)
+create_tag_list(normalDistribution1, 3)
+
+# Shuffle the data.
+np.random.shuffle(data)
 
 print data
+
+
 ##############################################################################
 ## count, bins, ignored = plt.hist(normalDistribution6, 30, normed=True)    ##
 ## plt.plot(bins, 1/(sigma * np.sqrt(2 * np.pi)) *                          ##
