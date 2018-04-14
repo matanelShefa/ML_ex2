@@ -1,10 +1,11 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.stats import norm
 
 
 # Create a normal distribution with the given parameters.
 def create_normal_distribution(mean, std):
-    normal_distribution = np.random.normal(mean, std, 100)  # Create the normal distribution.
+    normal_distribution = np.random.normal(mean, std, 1000)  # Create the normal distribution.
     np.random.shuffle(normal_distribution)  # Shuffle the data.
     return normal_distribution
 
@@ -16,10 +17,21 @@ def create_tag_list(points_list, tag):
 
 
 # The softMax function.
-def soft_max(w, t):
-    e = np.exp(np.array(w) / t)
-    dist = e / np.sum(e)
+def soft_max(w):
+    #e = np.exp(w)
+    e = np.exp(w - np.max(w))
+    dist = e / e.sum()
     return dist
+
+
+# Predict the probability tag for this example.
+def predict(example_to_predict):
+    # Create the example + bias vector.
+    example_vector = np.array([1, example_to_predict[0]])
+    example_vector.shape = (2, 1)
+    # Predict.
+    soft_max_input = np.matmul(weightMatrix, example_vector)
+    return np.array(soft_max(soft_max_input))
 
 
 # Create a binary vector for the update calculation.
@@ -41,8 +53,8 @@ normalDistribution3 = create_normal_distribution(6, 1)
 # Create the data set.
 data = []
 create_tag_list(normalDistribution1, 1)
-create_tag_list(normalDistribution1, 2)
-create_tag_list(normalDistribution1, 3)
+create_tag_list(normalDistribution2, 2)
+create_tag_list(normalDistribution3, 3)
 # Shuffle the data.
 np.random.shuffle(data)
 
@@ -50,22 +62,48 @@ np.random.shuffle(data)
 weightMatrix = np.random.random([3, 2])
 learningRate = 0.1
 
-# The algorithm.
-for i in range(0, 100):
+# The practice.
+for i in range(0, 100): # TODO - CHANGE TO 100?
     for example in data:
-        # Create the example + bias vector.
-        exampleVector = np.array([1, example[0]])
-        exampleVector.shape = (2, 1)
-        softMaxInput = np.matmul(weightMatrix, exampleVector)
-        prediction = np.array(soft_max(softMaxInput, 1))
+        # Predict.
+        prediction = predict(example)
+        #print 'AFTER PREDICT: weightMatrix =\n', weightMatrix
+        # Loss calculation.
         subtractionVector = np.array(vector_create(example[1]))
         subtractionVector.shape = (3, 1)
+        #print 'prediction - subtractionVector = ', prediction, ' - ', subtractionVector
         update = prediction - subtractionVector
+        #print 'update = ', update
+        # Update.
+        exampleVector = np.array([1, example[0]])
         exampleVector.shape = (1, 2)
+        #print 'exampleVector = ', exampleVector
         updateMatrix = np.matmul(update, exampleVector)
+        #print 'BEFORE LR: updateMatrix =\n', updateMatrix
+        #print 'AFTER LR: updateMatrix =\n', learningRate * updateMatrix
         weightMatrix = weightMatrix - (learningRate * updateMatrix)
+        #print 'AFTER UPDATE: weightMatrix =\n', weightMatrix
 
-plt.plot(data)
-plt.axis([0, 10, 0, 20])
+# The test.
+
+predictionSet = []
+trueProb = []
+numberList = []
+#numberList = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+for number1 in range(0, 100):
+#for number1 in numberList:
+    number2 = np.random.uniform(0, 10)
+    prediction = predict([number2, 0])
+    if number1 % 10 == 0:
+        print 'number: ', number2, ', prediction: ', prediction[0]
+    predictionSet.extend(prediction[0])
+    numberList.append(number2)
+    #trueProb.append(norm.pdf(number1, 2, 1))
+
+#plt.plot(trueProb)
+print numberList
+print "predictionSet", predictionSet
+plt.plot(numberList, predictionSet, 'ro')
+plt.axis([0, 10, 0, 1])
 plt.ylabel('some numbers')
 plt.show()
